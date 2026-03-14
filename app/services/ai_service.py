@@ -1,4 +1,5 @@
 import os
+import json
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -13,14 +14,14 @@ client = OpenAI(
 def generate_meeting_summary(transcript):
 
     prompt = f"""
-You are an AI meeting assistant.
+Analyze the following meeting transcript and return ONLY JSON.
 
-From the transcript generate:
-1. Executive Summary
-2. Key Decisions
-3. Action Items
-4. Topic-wise Summary
-5. Minutes of Meeting
+Fields required:
+- executive_summary
+- key_decisions
+- action_items
+- topic_summary
+- minutes_of_meeting
 
 Transcript:
 {transcript}
@@ -32,4 +33,11 @@ Transcript:
         max_tokens=800
     )
 
-    return response.choices[0].message.content
+    analysis_text = response.choices[0].message.content
+
+    try:
+        analysis_json = json.loads(analysis_text)
+    except:
+        analysis_json = {"analysis": analysis_text}
+
+    return analysis_json
